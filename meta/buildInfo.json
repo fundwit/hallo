@@ -1,0 +1,14 @@
+{
+  "buildTime": "2020-08-18T01:11:05+08:00",
+  "version": "91af3d145c8f6150248813d2869182fa5d6c6c63",
+  "sourceCodes": [{
+    "repository": "fundwit/hallo",
+    "ref": "refs/heads/develop",
+    "reversion": {
+      "id": "91af3d145c8f6150248813d2869182fa5d6c6c63",
+      "author": "Ann",
+      "message": "some awesome feature",
+      "timestamp": "0000-01-01T00:00:00Z"
+    }
+  }]
+}

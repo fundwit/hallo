@@ -1,0 +1,85 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hallo
+  namespace: default
+  labels:
+    app: hallo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hallo
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: hallo
+    spec:
+      containers:
+        - name: hallo
+          image: registry.cn-beijing.aliyuncs.com/fundwit/hallo:sha-498d460
+          imagePullPolicy: IfNotPresent
+          env:
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: mysql
+          - name: MYSQL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: username
+                name: mysql
+          - name: DATABASE_URL
+            value: mysql://${MYSQL_USERNAME}:${MYSQL_PASSWORD}@(mysql.default:3306)/hallo?charset=utf8mb4&parseTime=True&loc=Local
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: cr-aliyun
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hallo
+  name: hallo
+  namespace: default
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: hallo
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hallo
+  namespace: default
+spec:
+  rules:
+    - host: hallo-core.fundwit.com
+      http:
+        paths:
+          - backend:
+              serviceName: hallo
+              servicePort: 80
+            path: /
